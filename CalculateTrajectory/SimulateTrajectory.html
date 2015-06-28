@@ -1,0 +1,418 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+   
+
+    <link rel="stylesheet" type="text/css" href="../Content/css/bootstrap.css">
+        <script type="text/javascript" src="//www.google.com/jsapi"></script>
+
+    <script type="text/javascript" src="Scripts/app/EstimateCubicRoot.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $(':input[type="number" ]').bind('blur', function ($this) {
+                    var i = this.value;
+                    if (isNaN(i) || i == "") {
+                        alert('please enter a number!');
+                    }
+                });
+            });
+
+        </script>
+
+
+        <style>
+            body {
+                background-color: #D6E0EB;
+            }
+
+            h1 {
+                /*color: maroon;*/
+                font-size: 25px;
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+
+            table.extraTopPdg {
+                margin-top: 30px;
+            }
+
+            section table {
+                width: 100%;
+            }
+
+            table {
+                max-width: 100%;
+                background-color: transparent;
+                border-collapse: collapse;
+                border-spacing: 0;
+                border-color: gray;
+            }
+
+            section table tr th:last-child {
+                padding-right: 30px;
+            }
+
+            section table tr th:first-child {
+                padding-left: 30px;
+            }
+
+            table th {
+                background-color: #ABB3BC;
+                font-size: 1.25em;
+                font-weight: bold;
+                text-align: left;
+            }
+
+                table th:last-child {
+                    border-top-right-radius: 6px;
+                }
+
+                table th:first-child {
+                    border-top-left-radius: 6px;
+                }
+
+
+
+            table tr th {
+                padding: 10px;
+            }
+
+            .shadow {
+                background-color: #fff;
+                border: 4px solid transparent;
+                border-radius: 10px;
+                box-shadow: 0 0 8px 0px #000;
+            }
+
+            .button {
+                background-color: #FFF;
+                border: 2px solid #959595;
+                border-radius: 9px;
+                font-weight: bold;
+                margin-top:10px;
+            }
+
+            .red {
+                color: red;
+            }
+
+            .blue {
+                color: blue;
+            }
+        </style>
+</head>
+
+<body>
+    <section>
+       
+        <div class="container clearfix" >
+            <div class="clearfix">
+                <h1 align="center">Simulate Gravitational Force Impact On Cannonball Trajectory</h1>
+
+                <!--<form id="ok" onsubmit="return validateMyForm();">-->
+
+                <div class="shadow">
+                    <table>
+                        <tr>
+                            <th colspan="2" align="right">Estimate Trajectory of Cannonball</th>
+                        </tr>
+                        <tr>
+
+                            <td align="right"><b>Planetational Gravity:</b></td>
+               
+                            <td>
+                                <input type="checkbox" class="gravity" value="-9.8" id="checkbox1" onclick="choice=this.value;" style="margin-right : 5px">Earth
+
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td id="guessId"><input type="checkbox" class="gravity" value="-3.7" id="checkbox2" onclick="choice=this.value;" style="margin-right : 5px">Mars<br></td>
+
+                        </tr>
+
+                        <tr>
+                            <!--<td align="right" class="textboxlabel"><b>Coefficient a:</b></td>-->
+                            <td></td>
+                            <td><input type="checkbox" class="gravity" value="-1.6" id="checkbox3" onclick="choice=this.value;" style="margin-right : 5px">Moon<br></td>
+                        </tr>
+
+                        <tr>
+                            <!--<td align="right" class="textboxlabel"><b>Coefficient b:</b></td>-->
+                            <td align="right"><b>Initial velocity in m/s :</b></td>
+                            <td>
+                                <input type="text" id="vinitial" name="fact1" placeholder="---Velocity---" />
+                                <br>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td align="right"><b>Launch angle in degrees:</b></td>
+
+                            <td><input type="text" id="angle" name="fact2" placeholder="---Angle in Degrees---" /></td>
+                        </tr>
+
+                       
+
+                        <tr>
+                            <td></td>
+                            <!--<td><button type="submit" id="button0" class="button" ng-click="calculateRoot()">Estimate Root!</button></td>-->
+                            <td>
+                                <button class="button" onclick="drawTrajectory()">
+                                    Get Trajectory
+                                </button>
+                            </td>
+                        </tr>
+
+
+                    </table>
+                    
+
+                    <div>
+                        <table class="extraTopPdg" id="graphTable">
+                            <tr>
+                                <th id="head2">The scatter-plot to show how initial guess approaches to final estimate </th>
+
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" align="left">
+                                    <div id="visualization" style="width: 500px; height: 400px;">
+                                    </div>
+                                </td>
+
+                            </tr>
+
+
+                        </table>
+                    </div>
+                </div>
+
+                <!--</form>-->
+
+            </div>
+        </div>
+    </section>
+    
+    <script type="text/javascript">
+    //Load google graphing library
+    google.load('visualization', '1', { packages: ['corechart'] });
+    //set graphing function drawTrajectory as callback function in google.setOnLoadCallback
+    google.setOnLoadCallback(drawTrajectory);
+
+    function findTrajectory(v, g, aInRadians) {
+        var maxInAirTime = -2 * v * Math.sin(aInRadians) / g;
+        var n = 8;
+        var t = new Array();
+        for (i = 0; i < 9; i++) {
+            t[i] = i * maxInAirTime / n;
+        }
+
+        //set up x,y coordinate of cannonball
+        var x = new Array();
+        var y = new Array();
+        for (i = 0; i < 9; i++) {
+            x[i] = v * Math.cos(aInRadians) * t[i];
+            y[i] = v * Math.sin(aInRadians) * t[i] + 0.5 * g * t[i] * t[i];
+        }
+
+        return [x, y];
+
+
+    } //end of findTrajectory
+
+    function drawTrajectory() {
+
+        //retrieve initial v and angle
+        var v = document.getElementById("vinitial").value;
+        var p = document.getElementById("angle").value;
+        var aInRadians = p * (Math.PI / 180);
+
+        //var gravityCheckbox = document.getElementsByTagName("gravity");
+        var gravityCheckbox = document.getElementsByClassName("gravity");
+        var a = Array();
+        for (var i = 0; i < gravityCheckbox.length; i++) {
+            // Take only those inputs which are checkbox
+            //if (gravityCheckbox[i].type === "checkbox" && gravityCheckbox[i].checked) {
+            if (gravityCheckbox[i].checked) {
+                a.push(gravityCheckbox[i].value);
+            }
+        }
+
+        var data = new google.visualization.DataTable();
+        var hMax;
+        var vMax;
+
+        if (a.length == 1) {
+            var g = a[0];
+            if (gravityCheckbox[0].checked) {
+                data.addColumn('number', 'Earth-x');
+                data.addColumn('number', 'Earth');
+
+            } else if (gravityCheckbox[1].checked) {
+                data.addColumn('number', 'Mars-x');
+                data.addColumn('number', 'Mars');
+            } else if (gravityCheckbox[2].checked) {
+                data.addColumn('number', 'Moon-x');
+                data.addColumn('number', 'Moon');
+            }
+
+            var traj = findTrajectory(v, g, aInRadians);
+            var x = traj[0];
+            var y = traj[1];
+            for (i = 0; i < x.length; i++) {
+                data.addRow([x[i], y[i]]);
+            }
+
+            hMax = data.getColumnRange(0).max;
+            vMax = data.getColumnRange(1).max;
+
+        } else if (a.length == 2) {
+            var data1 = new google.visualization.DataTable();
+            var data2 = new google.visualization.DataTable();
+
+            if (gravityCheckbox[0].checked && gravityCheckbox[1].checked) {
+                data1.addColumn('number', 'Earth-x');
+                data1.addColumn('number', 'Earth-y');
+                var traj1 = findTrajectory(v, a[0], aInRadians);
+                var x = traj1[0];
+                var y = traj1[1];
+                for (i = 0; i < x.length; i++) {
+                    data1.addRow([x[i], y[i]]);
+                }
+
+                data2.addColumn('number', 'Mars-x');
+                data2.addColumn('number', 'Mars-y');
+                var traj2 = findTrajectory(v, a[1], aInRadians);
+                var x = traj2[0];
+                var y = traj2[1];
+                for (i = 0; i < x.length; i++) {
+                    data2.addRow([x[i], y[i]]);
+                }
+                //moved var data
+
+
+            } else if (gravityCheckbox[0].checked && gravityCheckbox[2].checked) {
+                data1.addColumn('number', 'Earth-x');
+                data1.addColumn('number', 'Earth-y');
+                var traj1 = findTrajectory(v, a[0], aInRadians);
+                var x = traj1[0];
+                var y = traj1[1];
+                for (i = 0; i < x.length; i++) {
+                    data1.addRow([x[i], y[i]]);
+                }
+
+                data2.addColumn('number', 'Moon-x');
+                data2.addColumn('number', 'Moon');
+                var traj2 = findTrajectory(v, a[1], aInRadians);
+                var x2 = traj2[0];
+                var y2 = traj2[1];
+                for (i = 0; i < x2.length; i++) {
+                    data2.addRow([x2[i], y2[i]]);
+
+                }
+
+            } else if (gravityCheckbox[1].checked && gravityCheckbox[2].checked) {
+                data1.addColumn('number', 'Mars-x');
+                data1.addColumn('number', 'Mars-y');
+                var traj1 = findTrajectory(v, a[0], aInRadians);
+                var x2 = traj1[0];
+                var y2 = traj1[1];
+                for (i = 0; i < x2.length; i++) {
+                    data1.addRow([x2[i], y2[i]]);
+                }
+
+                data2.addColumn('number', 'Moon-x');
+                data2.addColumn('number', 'Moon');
+                var traj3 = findTrajectory(v, a[1], aInRadians);
+                var x3 = traj3[0];
+                var y3 = traj3[1];
+                for (i = 0; i < x3.length; i++) {
+                    data2.addRow([x3[i], y3[i]]);
+
+                }
+                //data = google.visualization.data.join(data2, data3, 'full', [[0, 0], [1, 1]], [1], [1]);
+
+
+            }
+
+            data = google.visualization.data.join(data1, data2, 'full', [[0, 0]], [1], [1]);
+            hMax = data.getColumnRange(0).max;
+            vMax = Math.max(data.getColumnRange(1).max, data.getColumnRange(2).max);
+
+
+        } else if (a.length == 3) {
+            var data1 = new google.visualization.DataTable();
+            var data2 = new google.visualization.DataTable();
+            var data3 = new google.visualization.DataTable();
+
+            data1.addColumn('number', 'Earth-x');
+            data1.addColumn('number', 'Earth');
+            var traj1 = findTrajectory(v, a[0], aInRadians);
+            var x = traj1[0];
+            var y = traj1[1];
+            for (i = 0; i < x.length; i++) {
+                data1.addRow([x[i], y[i]]);
+            }
+
+            data2.addColumn('number', 'Mars-x');
+            data2.addColumn('number', 'Mars');
+            var traj2 = findTrajectory(v, a[1], aInRadians);
+            var x = traj2[0];
+            var y = traj2[1];
+            for (i = 0; i < x.length; i++) {
+                data2.addRow([x[i], y[i]]);
+            }
+
+            data3.addColumn('number', 'Moon-x');
+            data3.addColumn('number', 'Moon');
+            var traj3 = findTrajectory(v, a[2], aInRadians);
+            var x = traj3[0];
+            var y = traj3[1];
+            for (i = 0; i < x.length; i++) {
+                data3.addRow([x[i], y[i]]);
+            }
+
+            var joined2Data = google.visualization.data.join(data1, data2, 'full', [[0, 0]], [1], [1]);
+
+            var data = google.visualization.data.join(joined2Data, data3, 'full', [[0, 0]], [1, 2], [1]);
+            hMax = data.getColumnRange(0).max;
+            vMax = Math.max(data.getColumnRange(1).max, data.getColumnRange(2).max, data.getColumnRange(3).max);
+
+        }
+
+        var options = {
+            curveType: "function",
+            width: 600, height: 400,
+            title: "Cannon ball trajectory",
+            hAxis: { title: "Distance (m)", maxValue: hMax },
+            vAxis: { title: "Height (m)", maxValue: vMax }
+
+        };
+
+        var container = document.getElementById('visualization');
+        var chart = new google.visualization.LineChart(container);
+        chart.draw(data, options);
+
+    } //end of drawTrajectory
+
+    </script>
+
+
+
+
+
+
+
+    
+    
+</body>
+
+
+
+</html>
+

@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+    <script src="/bower_components/angular-touch/angular-touch.js"></script>
+    <script src="../Scripts/papaparse.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="Content/css/bootstrap.css">
+        <script type="text/javascript" src="//www.google.com/jsapi"></script>
+    
+    <script type="text/javascript" src="weatherServiceApp.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $(':input[type="number" ]').bind('blur', function ($this) {
+                    var i = this.value;
+                    if (isNaN(i) || i == "") {
+                        alert('please enter a number!');
+                    }
+                });
+            });
+
+        </script>
+
+
+        <style>
+            body {
+                /*background-color: linen;*/
+                background-color: #D6E0EB;
+            }
+
+            h1 {
+                /*color: maroon;*/
+                color: #336699
+                font-size: 25px;
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+
+            table.extraTopPdg {
+                margin-top: 30px;
+            }
+
+            section table {
+                width: 100%;
+            }
+
+            table {
+                max-width: 100%;
+                background-color: transparent;
+                border-collapse: collapse;
+                border-spacing: 0;
+                border-color: gray;
+            }
+
+            section table tr th:last-child {
+                padding-right: 30px;
+            }
+
+            section table tr th:first-child {
+                padding-left: 30px;
+            }
+
+            table th {
+                /*background-color: #c2b777;*/
+                background-color: #ABB3BC;
+                font-size: 1.25em;
+                font-weight: bold;
+                text-align: left;
+            }
+
+                table th:last-child {
+                    border-top-right-radius: 6px;
+                }
+
+                table th:first-child {
+                    border-top-left-radius: 6px;
+                }
+
+
+
+            table tr th {
+                padding: 10px;
+            }
+
+            .shadow {
+                background-color: #fff;
+                border: 4px solid transparent;
+                border-radius: 10px;
+                box-shadow: 0 0 8px 0px #000;
+            }
+
+            .button {
+                background-color: #FFF;
+                border: 2px solid #959595;
+                border-radius: 9px;
+                font-weight: bold;
+            }
+
+            .red {
+                color: red;
+            }
+
+            .blue {
+                color: blue;
+            }
+            .onepx{
+                  width:1px;
+                }
+
+        </style>
+</head>
+
+<body>
+    <section>
+       
+        <div class="container clearfix" ng-app="weatherServiceApp" ng-controller="weatherServiceCtrl" > <!--ng-init="showWeather=false, displayMessage=false"-->
+            <div class="clearfix">
+                <h1>Weather Service(AngularJS)</h1>
+
+                <!--<form id="ok" onsubmit="return validateMyForm();">-->
+
+                <div class="shadow">
+                    <table>
+                        <tr>
+                            <th colspan="3">Seach Weather</th>
+                        </tr>
+                        <tr>
+
+                            <td></td>
+                            <td colspan="2">
+                                <!--<div id="message" ng-show="displayMessage">{{weather.message}}</div>-->
+                                <div id="message" ng-show="displayMessage">{{weather.message}}</div>
+                            </td>
+
+                        </tr>
+                        
+                        <tr style="margin-top:10px">
+                            <td align="right" class="textboxlabel"><b>Weather at:</b></td>
+                            <td class="onepx">
+                                <select id="locationBy" ng-model="locationBy" required ng-change="onLocationByChange()">
+                                    <option value="">---- Specify a location by---- </option>
+                                    <option value="zip">Zip Code</option>
+                                    <option value="city">City</option>
+                                    <option value="lanLon">Lan & Lon:</option>
+                                </select>
+                            </td>
+                            <!--<td align="left"> <input type="text" name="location" id="location" ng-model="location" ng-mouseover="location=''" required /></td>-->
+                            <td align="left"> 
+                                <input type="text" name="location" id="location" ng-mousedown="location=''" ng-model="location" ng-show="!showLanlon" required />  <!--mousedown is used to get rid of default text.-->
+                                <input type="text" name="lat" id="lat" ng-model="lat" ng-mousedown="lat=''" ng-show="showLanlon" required />
+                                <input type="text"  name="lon" id="lon" ng-model="lon" ng-mousedown="lon=''" ng-show="showLanlon" required /> <!--system of show's used for dynamic textbox add and delete-->
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td style="display:block" colspan="2">
+                                <input type="checkbox" id="current" ng-model="current" checked="checked" /><span><b>Current Weather:</b></span> <!--current allows the div that shows current weather to display-->
+                                
+                            </td>
+                            
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td style="display:block" colspan="2">
+                                <input type="checkbox" id="five" ng-model="forecast" /><span><b>7-day Forecast:</b></span>
+                               
+                            </td>
+
+                        </tr>
+                        <!--<tr>
+                            <td></td>
+                            <td style="display:block" colspan="2">
+                                <input type="checkbox" id="Chart" ng-model="Chart" disabled /><span><b>Need Chart Illustration?</b></span>
+                            </td>
+
+                        </tr>-->
+
+                        <tr>
+                            <td></td>
+                            <td colspan="2"><button type="submit" id="button0" class="button" ng-click="getWeatherService()" style="margin-top:10px">Get Weather Info!</button></td>
+                        </tr>
+                    </table>
+
+                    <!--<div ng-show="showWeather">-->
+                    <div ng-show="current">
+                        <table class="extraTopPdg" id="graphTable">
+                            <tr>
+                                <th id="head2" colspan="3">Current Weather at location: {{weather.name}} </th>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="padding-left: 30px"><span><b>Cloudness: </b>{{weather.weather[0].description}}</span></td>
+                            </tr>
+                            <tr>
+                                <td style="padding-left: 30px" colspan="3">
+                                    <b>Temperature: </b>
+                                    <b>Current: </b>{{weather.main.temp}}
+                                    <b>Max: </b>{{weather.main.temp_max}}
+                                    <b>Min: </b>{{weather.main.temp_min}}
+
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding-left: 30px" colspan="3">
+                                    <b>Wind: </b>
+                                    <b>Speed: </b>{{weather.wind.speed}}
+                                    <b>Direction: </b>{{weather.wind.direction}}
+
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+                    <!--<div ng-show="showForcast">-->
+                    <div ng-show="forecast">
+                        <table class="extraTopPdg" id="graphTable">
+                            <tr>
+                                <th id="head2" colspan="3">Forecast for location: {{weather.name}} </th>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="padding-left: 30px"><span><b>Cloudness: </b>{{weather.weather[0].description}}</span></td>
+                            </tr>
+                            <tr>
+                                <td style="padding-left: 30px" colspan="3">
+                                    <b>Temperature: </b>
+                                    <b>Current: </b>{{weather.main.temp}}
+                                    <b>Max: </b>{{weather.main.temp_max}}
+                                    <b>Min: </b>{{weather.main.temp_min}}
+
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding-left: 30px" colspan="3">
+                                    <b>Wind: </b>
+                                    <b>Speed: </b>{{weather.wind.speed}}
+                                    <b>Direction: </b>{{weather.wind.direction}}
+
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+                    <!--<div ng-show="showChart">-->
+                    <div ng-show="Chart">
+                        <table class="extraTopPdg" id="graphTable">
+                            <tr>
+                                <th id="head2">Forecast Viaulization</th>
+
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" align="center">
+                                    <div id="visualization" style="width: 500px; height: 400px;" g-chart></div>
+                                </td>
+
+                            </tr>
+
+
+                        </table>
+                    </div>
+                </div>
+
+                <!--</form>-->
+
+            </div>
+        </div>
+    </section>    
+    
+</body>
+
+
+
+</html>
+

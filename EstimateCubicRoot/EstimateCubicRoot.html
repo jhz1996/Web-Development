@@ -1,0 +1,227 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+    <script src="/bower_components/angular-touch/angular-touch.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../Content/css/bootstrap.css">
+        <script type="text/javascript" src="//www.google.com/jsapi"></script>
+
+    <script type="text/javascript" src="Scripts/app/EstimateCubicRoot.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $(':input[type="number" ]').bind('blur', function ($this) {
+                    var i = this.value;
+                    if (isNaN(i) || i == "") {
+                        alert('please enter a number!');
+                    }
+                });
+            });
+
+        </script>
+
+
+        <style>
+            body {
+                background-color: #D6E0EB;
+            }
+
+            h1 {
+                /*color: maroon;*/
+                font-size: 25px;
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+
+            table.extraTopPdg {
+                margin-top: 30px;
+            }
+
+            section table {
+                width: 100%;
+            }
+
+            table {
+                max-width: 100%;
+                background-color: transparent;
+                border-collapse: collapse;
+                border-spacing: 0;
+                border-color: gray;
+            }
+
+            section table tr th:last-child {
+                padding-right: 30px;
+            }
+
+            section table tr th:first-child {
+                padding-left: 30px;
+            }
+
+            table th {
+                background-color: #ABB3BC;
+                font-size: 1.25em;
+                font-weight: bold;
+                text-align: left;
+            }
+
+                table th:last-child {
+                    border-top-right-radius: 6px;
+                }
+
+                table th:first-child {
+                    border-top-left-radius: 6px;
+                }
+
+
+
+            table tr th {
+                padding: 10px;
+            }
+
+            .shadow {
+                background-color: #fff;
+                border: 4px solid transparent;
+                border-radius: 10px;
+                box-shadow: 0 0 8px 0px #000;
+            }
+
+            .button {
+                background-color: #FFF;
+                border: 2px solid #959595;
+                border-radius: 9px;
+                font-weight: bold;
+                margin-top:10px;
+            }
+
+            .red {
+                color: red;
+            }
+
+            .blue {
+                color: blue;
+            }
+        </style>
+</head>
+
+<body>
+    <section>
+       
+        <div class="container clearfix" ng-app="estimateRootApp" ng-controller="estimateRootCtrl" ng-init="showChart=false">
+            <div class="clearfix">
+                <h1 align="center">Estimate Cubic Root Using Newton's Approximation</h1>
+
+                <!--<form id="ok" onsubmit="return validateMyForm();">-->
+
+                <div class="shadow">
+                    <table>
+                        <tr>
+                            <th colspan="2">Estimate Roots of Cubic Equation: ax<sup>3</sup>+bx<sup>2</sup>+cx+d=0</th>
+                        </tr>
+                        <tr>
+
+                            <td></td>
+                            <td>
+                                <div id="error"></div>
+
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td align="right" id="guessId" class="textboxlabel"><b>Initial Guess: </b></td>
+
+                            <td><input type="number" name="FileName" id="guess" class="home" required /></td>
+                        </tr>
+
+                        <tr>
+                            <td align="right" class="textboxlabel"><b>Precision:</b></td>
+                            <td>
+                                <select id="prec">
+                                    <option value="0.01">0.01</option>
+                                    <option value="0.001">0.001</option>
+                                    <option value="0.0001">
+                                        0.0001
+                                    </option>
+
+                                </select>
+                            </td>
+
+
+                        </tr>
+
+                        <tr>
+                            <td align="right" class="textboxlabel"><b>Coefficient a:</b></td>
+
+                            <td><input type="number" name="x1" id="a" required /></td>
+                        </tr>
+
+                        <tr>
+                            <td align="right" class="textboxlabel"><b>Coefficient b:</b></td>
+
+                            <td><input type="number" name="x1" id="b" required /></td>
+                        </tr>
+
+                        <tr>
+                            <td align="right" class="textboxlabel"><b>Coefficient c:</b></td>
+
+                            <td><input type="number" name="x1" id="c" required /></td>
+                        </tr>
+
+                        <tr>
+                            <td align="right" class="textboxlabel"><b>Coefficient d:</b></td>
+
+                            <td><input type="number" name="x1" id="d" required /></td>
+                        </tr>
+
+
+                        <tr>
+
+                            <td align="right"><b>Need Graph?</b> </td>
+
+                            <td>
+                                <input type="radio" id="yes" name="choice" value="Yes" checked="checked">Yes
+                                <input type="radio" id="no" name="choice" value="No">No
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td></td>
+                            <td><button type="submit" id="button0" class="button" ng-click="calculateRoot()">Estimate Root!</button></td>
+                        </tr>
+
+
+                    </table>
+
+
+                    <div ng-show="showChart">
+                        <table class="extraTopPdg" id="graphTable">
+                            <tr>
+                                <th id="head2">The scatter-plot to show how initial guess approaches to final estimate </th>
+
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" align="left"> <!--id="visualization" style="width: 500px; height: 400px;"-->
+                                    <div  g-chart></div>
+                                </td>
+
+                            </tr>
+
+
+                        </table>
+                    </div>
+                </div>
+
+                <!--</form>-->
+
+            </div>
+        </div>
+    </section>    
+    
+</body>
+
+
+
+</html>
+

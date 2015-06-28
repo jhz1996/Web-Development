@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="../Scripts/papaparse.min.js"></script>
+    <script src="Scripts/angular.min.js"></script>
+    <script type="text/javascript" src="//www.google.com/jsapi"></script>
+</head>
+<body ng-app="app" ng-controller="MainCtrl">
+    <script>
+
+
+        var app = angular.module('app', []);
+
+        google.load('visualization', '1', { packages: ['corechart'] });
+        google.setOnLoadCallback(function () {
+            angular.bootstrap(document.body, ['app']);
+        });
+
+        app.controller('MainCtrl', function ($scope) {
+
+            $scope.add = function () {
+                var f = document.getElementById('file').files[0],
+                r = new FileReader();
+                var numRows;
+                var stock = [];
+                var price = [];
+                r.onloadend = function (e) {
+
+                    Papa.parse(f, {
+                        header: true,
+                        dynamicTyping: true,
+                        complete: function (results) {
+                            //$scope.data = results.data;
+                            $scope.results = results;
+                            $scope.numRows = $scope.results.data.length;
+                            $scope.numCols = $scope.results.data[0].length;
+                            console.log("Finished:", results.data);
+
+                            //for (var i = 0; i < $scope.numRows; i++) {
+                            //    stock.push($scope.results.data[i].month);
+
+                            //}
+                            //for (var i = 0; i < $scope.numRows; i++) {
+                            //    price.push($scope.results.data[i].price);
+
+                            //}
+                        }
+
+                    });
+                    for (var i = 0; i < $scope.numRows; i++) {
+                        stock.push($scope.results.data[i].month);
+
+                    }
+                    for (var i = 0; i < $scope.numRows; i++) {
+                        price.push($scope.results.data[i].price);
+
+                    }
+
+                    var dataTable = new google.visualization.DataTable();
+                    dataTable.addColumn('number', 'stock');
+                    dataTable.addColumn('number', 'value');
+                    for (var i = 1; i < $scope.numRows; i++) {
+                        dataTable.addRow([stock[i], price[i]]);
+                    }
+                    //new content
+                    var nmax = dataTable.getColumnRange(0).max;
+                    var xmax = dataTable.getColumnRange(1).max;
+
+                    var options = {
+                        curveType: "function",
+                        width: 600, height: 400,
+                        title: "Newton method",
+                        hAxis: { title: "Iteration", maxValue: nmax + 1 },
+                        vAxis: { title: "Estimate", maxValue: xmax - 1 }
+
+                    };
+
+                    var chart = {};
+                    //$scope.data = data;
+                    //$scope.options = options;
+                    chart.data = dataTable;
+                    chart.options = options;
+                    $scope.chart = chart;
+
+                    //end of new content
+
+
+                }
+                r.readAsBinaryString(f);
+
+            }
+
+        });
+
+        app.directive('gChart', function () {
+            return {
+                restrict: 'A',
+                link: function ($scope, elm, attrs) {
+                    $scope.$watch('chart', function () {
+                        //    var type = $scope.chart.type;
+                        var chart = " ";
+                        //if(type=="1"){
+                        chart = new google.visualization.LineChart(elm[0]);
+                        //}
+                        //else if(type=="2"){
+                        //    chart = new google.visualization.BarChart(elm[0]);
+                        //}
+                        //else if(type=="3"){
+                        //    chart = new google.visualization.ColumnChart(elm[0]);
+                        //}
+                        //else if(type=="4"){
+                        //    chart = new google.visualization.PieChart(elm[0]);
+                        //}
+
+                        //chart.draw($scope.chart.data, $scope.chart.options);
+                        chart.draw($scope.chart.data, $scope.chart.options);
+                    }, true);
+                } //end of link function
+            } // end of return statement
+        });
+    </script>
+    <div id="visualization" g-chart></div>
+    <div>
+        <input type="file" id="file" name="file" />
+        <button ng-click="add()">Add</button>
+    </div>
+
+</body>
+
+</html>
